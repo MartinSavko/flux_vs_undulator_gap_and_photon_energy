@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
+import optparse
 import pickle
-import numpy
+import pylab
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy import exp, sqrt
@@ -10,21 +11,25 @@ from scipy.special import yn, jv, jn
 from scipy.optimize import minimize
 import glob
 import pandas as pd
-import seaborn as sns
 
+import re
+
+import seaborn as sns
 sns.set(color_codes=True)
 
 from matplotlib import rc
 rc('font', **{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
-def residual(x):
+from plot_scans import get_gap, get_slit_opening, get_ring_current
+
+
+def residual(x, data_matrix):
     k0, k1, k2 = x
-    data = pickle.load(open('data.pck'))
+    data = pickle.load(open(data_matrix))
     theory = []
     for gap, n in data[:, 0:2]:
-        theory.append(undulator_peak_energy(
-            gap, n, k0=k0, k1=k1, k2=k2))
+        theory.append(undulator_peak_energy(gap, n, k0=k0, k1=k1, k2=k2))
     theory = numpy.array(theory)
     experiment = data[:, 2]
     return 1. / (2 * len(theory)) * np.sum((experiment - theory) ** 2)
@@ -104,30 +109,27 @@ def get_flux_vs_energy(filename):
 
 def get_experimental_peaks(theory, exp_energy, exp_flux, gap, data):
     peak_positions = []
-    if gap < 8.1:
-        lim = 75
-    elif gap > 8.1 and gap < 8.5:
-        lim = 105
-    elif gap > 8.3 and gap < 10.3:
-        lim = 255
-    elif gap > 10.5 and gap < 11.9:
-        lim = 155
-    else:
-        lim = 205
-
+    #if gap < 8.1:
+        #lim = 75
+    #elif gap > 8.1 and gap < 8.5:
+        #lim = 105
+    #elif gap > 8.3 and gap < 10.3:
+        #lim = 255
+    #elif gap > 10.5 and gap < 11.9:
+        #lim = 155
+    #else:
+        #lim = 205
+    lim = 75
     total_max = exp_flux.max()
     for harmonic, n in theory[::3]:
 
         if harmonic > 5350. and harmonic < 19001:  # .max():
             # print 'harmonic'
             # print harmonic
-            maximum_flux = exp_flux[
-                (exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)].max()
+            maximum_flux = exp_flux[(exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)].max()
             # print 'maximum_flux', maximum_flux
-            me = exp_energy[
-                (exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)]
-            fe = exp_flux[
-                (exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)]
+            me = exp_energy[(exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)]
+            fe = exp_flux[(exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)]
             # print 'me', me
             # print 'fe', fe
             maximum_energy = me[np.where(np.abs(maximum_flux - fe) < 1)]
@@ -143,106 +145,33 @@ def get_experimental_peaks(theory, exp_energy, exp_flux, gap, data):
     return peak_positions
 
 
-import re
-
-
-def get_gap(filename):
-    return float(re.findall('undulator_scan_500mA_gap_([\d\.]*)_step.*', filename)[0])
-
-
-def main():
-    scans = glob.glob('undulator_*_*pck')
-    # scan =
-    # 'undulator_scan_500mA_gap_7.8_step_50_no_aperture_4keV-20keV_Tue_Nov_22_23-18-28_2016.pck'
-    data = []
-    for scan in scans:
-        gap = get_gap(scan)
-        print 'gap', gap
-        peak_energies = []
-        peak_heights = []
-        for harmonic in range(1, 21):
-            # 2.78325828, -3.93395593,  0.71832299
-            #(3.33, -5.47, 1.8)
-            #k0, k1, k2 = [3.81815378, -5.53642081,  2.71692885]
-            energy = undulator_peak_energy(
-                gap, harmonic, k0=2.72898056, k1=-3.83864548, k2=0.60969562)
-            peak_energies.append([energy, harmonic])
-            peak_heights.append(0)
-            peak_energies.append([energy, harmonic])
-            peak_heights.append(undulator_peak_intensity(gap, harmonic))
-            peak_energies.append([energy, harmonic])
-            peak_heights.append(0)
-
-        plt.figure(figsize=(16, 9))
-        energies, flux, xbpm1 = get_flux_vs_energy(scan)
-        experimental_peaks = get_experimental_peaks(
-            peak_energies, energies, flux, gap, data)
-        experimental_peaks_energies = []
-        experimental_peaks_heights = []
-        for harmonic in experimental_peaks:
-            energy = harmonic[0]
-            # print 'energy', harmonic, energy
-            experimental_peaks_energies.append(energy)
-            experimental_peaks_heights.append(0)
-            experimental_peaks_energies.append(energy)
-            experimental_peaks_heights.append(
-                1)  # undulator_peak_intensity(gap, harmonic))
-            experimental_peaks_energies.append(energy)
-            experimental_peaks_heights.append(0)
-        ep = np.array(experimental_peaks)
-        exppeaks = ep[:, 0]
-        print 'differences'
-        a = numpy.array([ep[k] - ep[k - 1] for k in range(1, len(ep))])
-        # print a
-        print 'average difference'
-        print np.mean(a)
-        # print 'exp vs. theory'
-        # print ep
-        print 'difference exp vs. theory'
-        print (ep[:, 0] - ep[:, 1])[:]
-        plt.plot(energies, flux / flux.max(), label='flux')
-        # plt.plot(energy, xbpm1/xbpm1.max(), label='xbpm1')
-        peak_energies = np.array(peak_energies)
-        plt.plot(peak_energies[:, 0], peak_heights / max(
-            peak_heights), label='model peaks')
-        plt.plot(experimental_peaks_energies,
-                 experimental_peaks_heights, label='experiment peaks')
-        plt.ylabel('flux [ph/s]')
-        plt.xlabel('energy [eV]')
-        plt.title('PX2 flux vs energy at %s mm undulator gap' % gap, fontsize=22)
-        plt.grid(True)
-        # plt.ylim([-0.2, 1.2])
-        plt.legend(fontsize=16)
-
-    data = numpy.array(data)
-    f = open('data.pck', 'w')
-    pickle.dump(data, f)
-    f.close()
-
-    # plt.show()
-
-
-def mine():
+def fit():
+    parser = optparse.OptionParser()
+    parser.add_option('-d', '--data_matrix', default='data_0.1x0.1mm_450mA.pkl', type=str, help='Data matrix file')
+    options, args = parser.parse_args()
     print 'residual'
-    # x0 = (3.33, -4.8442, 1.8372)
+    x0 = (3.33, -4.8442, 1.8372)
     # x0 = (3.33, -5.47, 1.8)
-    x0 = [2.72898056, -3.83864548, 0.60969562]
-    print residual((2.72898056, -3.83864548, 0.60969562))
+    #x0 = [2.72898056, -3.83864548, 0.60969562]
+    print residual(x0, options.data_matrix)
 
-    res = minimize(residual, x0, method='powell')
-    print res
-
+    result = minimize(residual, x0, args=(options.data_matrix,), method='powell')
+    print result
+    return result
 
 def plot():
-    import pylab
+    parser = optparse.OptionParser()
+    parser.add_option('-d', '--data_matrix', default='data_0.1x0.1mm_450mA.pkl', type=str, help='Data matrix file')
+    options, args = parser.parse_args()
+    
     colormap = plt.cm.gist_ncar
 
-    data = pickle.load(open('data.pck'))
+    data = pickle.load(open(options.data_matrix))
     harmonics = list(set(map(int, data[:, 1])))
     
     harmonics.sort()
     k0, k1, k2 = 2.71504025, -3.80924779,  0.55774775
-    
+    #k0, k1, k2 = 2.7289875 , -3.8387636 ,  0.60923686
     pylab.figure(figsize=(16, 9))
     #plt.gca().set_color_cycle([colormap(i) for i in np.linspace(0, 0.9, len(harmonics))])
     #plt.gca().set_color_cycle(sns.color_palette("cubehelix", len(harmonics)))
@@ -508,8 +437,7 @@ def plot():
     
     ax = pylab.gca()
     ax.text(0.83, 0.8, '\# data points = %d' % len(data), color='b', fontsize=18, transform=ax.transAxes)
-    ax.text(0.05, 0.15, 'model function: $B(x) = k_{0} \\exp(k_{1} x  + k_{2} x^{2}); x = \\frac{gap}{\lambda_{u}}$',
- fontsize=20, color='green', transform=ax.transAxes)
+    ax.text(0.05, 0.15, 'model function: $B(x) = k_{0} \\exp(k_{1} x  + k_{2} x^{2}); x = \\frac{gap}{\lambda_{u}}$', fontsize=20, color='green', transform=ax.transAxes)
     ax.text(0.05, 0.08, 'fit parameters: k_{0} = %6.3f, k_{1} = %6.3f, k_{2} = %6.3f' % (k0, k1, k2), fontsize=20, color='green', transform=ax.transAxes)
     
     #ax.text(0.83, 0.45, '$K = \\frac{eB\lambda_{u}}{m_{e}c2\\pi}$', fontsize=20, transform=ax.transAxes) 
@@ -539,8 +467,5 @@ def plot():
 
 
 if __name__ == '__main__':
-    # mine()
-    #
-    # main()
-    plot()
-    # main()
+    fit()
+    #plot()
