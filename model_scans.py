@@ -30,7 +30,7 @@ def residual(x, data_matrix):
     theory = []
     for gap, n in data[:, 0:2]:
         theory.append(undulator_peak_energy(gap, n, k0=k0, k1=k1, k2=k2))
-    theory = numpy.array(theory)
+    theory = np.array(theory)
     experiment = data[:, 2]
     return 1. / (2 * len(theory)) * np.sum((experiment - theory) ** 2)
 
@@ -100,7 +100,7 @@ def undulator_peak_intensity(gap, n, k0=2.72898056, k1=-3.83864548, k2=0.6096956
 
 
 def get_flux_vs_energy(filename):
-    r = numpy.array(pickle.load(open(filename)))
+    r = np.array(pickle.load(open(filename)))
     energy = r[:, 0]
     flux = r[:, 1]
     xbpm1 = r[:, -2]
@@ -145,28 +145,22 @@ def get_experimental_peaks(theory, exp_energy, exp_flux, gap, data):
     return peak_positions
 
 
-def fit():
-    parser = optparse.OptionParser()
-    parser.add_option('-d', '--data_matrix', default='data_0.1x0.1mm_450mA.pkl', type=str, help='Data matrix file')
-    options, args = parser.parse_args()
+def fit(data_matrix, method='powell'):
     print 'residual'
-    x0 = (3.33, -4.8442, 1.8372)
+    #x0 = (3.33, -4.8442, 1.8372)
     # x0 = (3.33, -5.47, 1.8)
-    #x0 = [2.72898056, -3.83864548, 0.60969562]
-    print residual(x0, options.data_matrix)
+    x0 = [2.72898056, -3.83864548, 0.60969562]
+    print residual(x0, data_matrix)
 
-    result = minimize(residual, x0, args=(options.data_matrix,), method='powell')
+    result = minimize(residual, x0, args=(data_matrix,), method=method)
     print result
     return result
 
-def plot():
-    parser = optparse.OptionParser()
-    parser.add_option('-d', '--data_matrix', default='data_0.1x0.1mm_450mA.pkl', type=str, help='Data matrix file')
-    options, args = parser.parse_args()
+def plot(data_matrix):
     
     colormap = plt.cm.gist_ncar
 
-    data = pickle.load(open(options.data_matrix))
+    data = pickle.load(open(data_matrix))
     harmonics = list(set(map(int, data[:, 1])))
     
     harmonics.sort()
@@ -184,7 +178,7 @@ def plot():
         # energy = []
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
-        selection = numpy.array(selection)
+        selection = np.array(selection)
         gaps = selection[:, 0]
         energies = selection[:, 2]
         #Bs = undulator_magnetic_field(gaps, n, 2.72898056, -3.83864548,  0.60969562)
@@ -218,7 +212,7 @@ def plot():
     for n in harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
-        selection = numpy.array(selection)
+        selection = np.array(selection)
         energies = selection[:, 2]
         fluxes = selection[:, 3]
         print 'n', n
@@ -249,7 +243,7 @@ def plot():
     for n in odd_harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
-        selection = numpy.array(selection)
+        selection = np.array(selection)
         energies = selection[:, 2]
         fluxes = selection[:, 3]
         print 'n', n
@@ -280,7 +274,7 @@ def plot():
     for n in even_harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
-        selection = numpy.array(selection)
+        selection = np.array(selection)
         energies = selection[:, 2]
         fluxes = selection[:, 3]
         print 'n', n
@@ -310,7 +304,7 @@ def plot():
     for n in harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
-        selection = numpy.array(selection)
+        selection = np.array(selection)
         energies = selection[:, 2]
         fluxes = selection[:, 3]
         gaps = selection[:, 0]
@@ -343,7 +337,7 @@ def plot():
     for n in harmonics: # [4, 5, 7, 8, 10, 11, 12]:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
-        selection = numpy.array(selection)
+        selection = np.array(selection)
         energies = selection[:, 2]
         fluxes = selection[:, 3]
         gaps = selection[:, 0]
@@ -376,7 +370,7 @@ def plot():
     sns.set_color_codes()
     gaps = list(set(data[:, 0]))
     gaps.sort()
-    gaps = numpy.array(gaps)
+    gaps = np.array(gaps)
     #bs1 = undulator_magnetic_field(gaps)
     #bs2 = undulator_magnetic_field(gaps, 3.81815378, -5.53642081,  2.71692885)
     #bs3 = undulator_magnetic_field(gaps, 3.33, -5.47, 1.8)
@@ -399,14 +393,14 @@ def plot():
     x0 = [3.3, -5.47,  1.8]
     #print residual((3.33, -5.47, 1.8))
     
-    gs = numpy.array(gs)
-    bs = numpy.array(bs)
-    ks = numpy.array(ks)
+    gs = np.array(gs)
+    bs = np.array(bs)
+    ks = np.array(ks)
     data = zip(gs, bs)
     data.sort(key=lambda x: x[0])
-    data = numpy.array(data)
+    data = np.array(data)
     d = pd.DataFrame()
-    #data['order'] = numpy.arange(len(gs))
+    #data['order'] = np.arange(len(gs))
     d['gap'] = data[:,0]
     d['B'] = data[:,1] + 0.3
     print 'data'
@@ -445,8 +439,6 @@ def plot():
     for label in (ax.get_xticklabels() + ax.get_yticklabels()):
         label.set_fontsize(16)
     
-    
-    
     ax_k = ax.twinx()
     ax_k.plot(gs, ks, 'bo')
     h = ax_k.set_ylabel('$K = \\frac{eB\lambda_{u}}{m_{e}c2\\pi}$', fontsize=18, labelpad=40)
@@ -465,7 +457,18 @@ def plot():
     
     pylab.show()
 
+def main():
+    parser = optparse.OptionParser()
+    parser.add_option('-d', '--data_matrix', default='data_0.1x0.1mm_450mA.pkl', type=str, help='Data matrix file')
+    parser.add_option('-f', '--fit', action='store_true', help='Perform a fit and print out the fitted parameters')
+    parser.add_option('-p', '--plot', action='store_true', help='Show the results and generate figures') 
+    options, args = parser.parse_args()
+    print options, args
+    if options.fit:
+        fit(options.data_matrix)
+    else:
+        plot(options.data_matrix)
+
 
 if __name__ == '__main__':
-    fit()
-    #plot()
+    main()
