@@ -34,8 +34,9 @@ def main():
             # 2.78325828, -3.93395593,  0.71832299
             #(3.33, -5.47, 1.8)
             #k0, k1, k2 = [3.81815378, -5.53642081,  2.71692885]
+            k0, k1, k2 = 2.73081755, -3.84032394,  0.60509254
             energy = undulator_peak_energy(
-                gap, harmonic, k0=2.72898056, k1=-3.83864548, k2=0.60969562)
+                gap, harmonic, k0=k0, k1=k1, k2=k2)
             peak_energies.append([energy, harmonic])
             peak_heights.append(0)
             peak_energies.append([energy, harmonic])
