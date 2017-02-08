@@ -156,6 +156,8 @@ def fit(data_matrix, method='powell'):
     print result
     return result
 
+xkcd_colors_that_i_like = ["pale purple", "coral", "moss green", "windows blue", "amber", "greyish", "faded green", "dusty purple", "crimson", "custard", "orangeish", "dusk blue", "ugly purple", "carmine", "faded blue", "dark aquamarine", "cool grey", "faded blue"]
+
 def plot(data_matrix):
     
     colormap = plt.cm.gist_ncar
@@ -174,9 +176,10 @@ def plot(data_matrix):
     #plt.gca().set_color_cycle(sns.diverging_palette(255, 133, l=60, n=len(harmonics), center="dark"))
     #plt.gca().set_color_cycle(sns.color_palette("hls", len(harmonics)))
     #plt.gca().set_color_cycle(sns.hls_palette(len(harmonics), l=.33, s=.9))
-    plt.gca().set_color_cycle(sns.color_palette("Set1", len(harmonics)))
-    print 'sns.color_palette("Set1", n_colors=len(harmonics))'
-    print sns.color_palette("Set1", len(harmonics))
+    #plt.gca().set_color_cycle(sns.color_palette("Set1", len(harmonics)))
+    plt.gca().set_color_cycle(sns.xkcd_palette(xkcd_colors_that_i_like))
+    print 'sns.xkcd_palette(xkcd_colors_that_i_like)'
+    print sns.xkcd_palette(xkcd_colors_that_i_like)
     for n in harmonics:
         # gap = []
         # energy = []
@@ -187,18 +190,16 @@ def plot(data_matrix):
         energies = selection[:, 2]
         modeled_energies = undulator_peak_energy(gaps, n, k0=k0, k1=k1, k2=k2)
         X = np.vstack([energies/1.e3, modeled_energies/1.e3, gaps]).T
-        print 'X'
-        print X
         np.savetxt('GAP_ENERGY_HARMONIC%s.txt' % n, X, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X.shape, comments='')
         #Bs = undulator_magnetic_field(gaps, n, 2.72898056, -3.83864548,  0.60969562)
         #Ks = undulator_strength(Bs)
         
-        print 'n', n
-        print 'gaps'
-        print gaps
-        print 'energies'
-        print energies
-        pylab.plot(energies, gaps, 'o-', color=sns.color_palette("Set1", n_colors=len(harmonics))[n-min(harmonics)], label='%d' % n)
+        #print 'n', n
+        #print 'gaps'
+        #print gaps
+        #print 'energies'
+        #print energies
+        pylab.plot(energies, gaps, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
         pylab.plot(modeled_energies, gaps, 'kv')
     pylab.title('Proxima 2A U24 undulator harmonic peak positions as function of gap and energy', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
@@ -216,7 +217,8 @@ def plot(data_matrix):
     #plt.gca().set_color_cycle(sns.color_palette("cubehelix", len(harmonics)))
     #plt.gca().set_color_cycle(sns.color_palette("hls", len(harmonics)))
     #plt.gca().set_color_cycle(sns.hls_palette(len(harmonics), l=.33, s=.9))
-    plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(harmonics)))
+    #plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(harmonics)))
+    plt.gca().set_color_cycle(sns.xkcd_palette(xkcd_colors_that_i_like))
     for n in harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
@@ -228,7 +230,7 @@ def plot(data_matrix):
         print energies
         print 'fluxes'
         print fluxes
-        pylab.plot(energies, fluxes, 'o-', color=sns.color_palette("Set1", n_colors=len(harmonics))[n-min(harmonics)], label='%d' % n)
+        pylab.plot(energies, fluxes, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
     pylab.title(
         'Proxima 2A U24 undulator tuning curves', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
@@ -247,7 +249,8 @@ def plot(data_matrix):
     #plt.gca().set_color_cycle(sns.color_palette("hls", len(harmonics)))
     odd_harmonics = [n for n in harmonics if n % 2 == 1]
     #plt.gca().set_color_cycle(sns.hls_palette(len(odd_harmonics), l=.33, s=.9))
-    plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(odd_harmonics)))
+    #plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(odd_harmonics)))
+    plt.gca().set_color_cycle(sns.xkcd_palette(xkcd_colors_that_i_like))
     for n in odd_harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
@@ -259,7 +262,7 @@ def plot(data_matrix):
         print energies
         print 'fluxes'
         print fluxes
-        pylab.plot(energies, fluxes, 'o-', color=sns.color_palette("Set1", n_colors=len(harmonics))[n-min(harmonics)], label='%d' % n)
+        pylab.plot(energies, fluxes, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
     pylab.title(
         'Proxima 2A U24 undulator tuning curves, odd harmonics', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
@@ -278,7 +281,8 @@ def plot(data_matrix):
     #plt.gca().set_color_cycle(sns.color_palette("hls", len(harmonics)))
     even_harmonics = [n for n in harmonics if n % 2 == 0]
     #plt.gca().set_color_cycle(sns.hls_palette(len(even_harmonics), l=.33, s=.9))
-    plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(even_harmonics)))
+    #plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(even_harmonics)))
+    plt.gca().set_color_cycle(sns.xkcd_palette(xkcd_colors_that_i_like))
     for n in even_harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
@@ -290,7 +294,7 @@ def plot(data_matrix):
         print energies
         print 'fluxes'
         print fluxes
-        pylab.plot(energies, fluxes, 'o-', color=sns.color_palette("Set1", n_colors=len(harmonics))[n-min(harmonics)], label='%d' % n)
+        pylab.plot(energies, fluxes, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
     pylab.title(
         'Proxima 2A U24 undulator tuning curves, even harmonics', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
@@ -308,7 +312,8 @@ def plot(data_matrix):
     #plt.gca().set_color_cycle(sns.diverging_palette(255, 133, l=60, n=len(harmonics), center="dark"))
     #plt.gca().set_color_cycle(sns.color_palette("hls", len(harmonics)))
     #plt.gca().set_color_cycle(sns.hls_palette(len(harmonics), l=.33, s=.9))
-    plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(harmonics)))
+    #plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(harmonics)))
+    plt.gca().set_color_cycle(sns.xkcd_palette(xkcd_colors_that_i_like))
     for n in harmonics:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
@@ -323,7 +328,7 @@ def plot(data_matrix):
         print energies
         print 'fluxes'
         print fluxes
-        pylab.plot(gaps, fluxes, 'o-', color=sns.color_palette("Set1", n_colors=len(harmonics))[n-min(harmonics)], label='%d' % n)
+        pylab.plot(gaps, fluxes, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
     pylab.title(
         'Proxima 2A U24 undulator flux vs. gap', fontsize=22)
     pylab.xlabel('gap [mm]', fontsize=18)
@@ -341,7 +346,8 @@ def plot(data_matrix):
     #plt.gca().set_color_cycle(sns.diverging_palette(255, 133, l=60, n=len(harmonics), center="dark"))
     #plt.gca().set_color_cycle(sns.color_palette("hls", len(harmonics)))
     #plt.gca().set_color_cycle(sns.hls_palette(len(harmonics), l=.33, s=.9))
-    plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(harmonics)))
+    #plt.gca().set_color_cycle(sns.color_palette("Set1", n_colors=len(harmonics)))
+    plt.gca().set_color_cycle(sns.xkcd_palette(xkcd_colors_that_i_like))
     for n in harmonics: # [4, 5, 7, 8, 10, 11, 12]:
         selection = list(data[data[:, 1] == n])
         selection.sort(key=lambda x: x[2])
@@ -359,7 +365,7 @@ def plot(data_matrix):
         print Ks
         theoric_fluxes = angular_flux_density(Ks, n, N=80)
         #theoric_fluxes = central_cone_flux(Ks)
-        pylab.plot(energies, theoric_fluxes, 'o-', color=sns.color_palette("Set1", n_colors=len(harmonics))[n-min(harmonics)], label='%d' % n)
+        pylab.plot(energies, theoric_fluxes, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
     pylab.title(
         'Proxima 2A U24 theoretic undulator tuning curves', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
