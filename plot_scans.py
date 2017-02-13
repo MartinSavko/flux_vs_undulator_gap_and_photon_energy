@@ -17,7 +17,7 @@ rc('font', **{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
 
 def get_gap(filename):
-    return float(re.findall('.*_gap_(.*)_step.*pkl', filename)[0])
+    return float(re.findall('.*_gap_(.*)_continuous_.*pkl', filename)[0])
  
 def XYZ(x,y,z):
     '''Go through the results and return X, Y, Z matrices for 3d plots'''
@@ -26,10 +26,16 @@ def XYZ(x,y,z):
     return X, Y, Z
 
 def get_ring_current(filename):
-    return int(re.findall('.*_scan_(.*)mA_.*pkl', filename)[0])
+    print filename
+    res = int(re.findall('.*_(.*)mA_.*pkl', filename)[0])
+    print res
+    return res
 
 def get_slit_opening(filename):
-    return re.findall('.*_ps_(.*)_gap_.*pkl', filename)[0]
+    print filename
+    res = re.findall('.*_ps_(.*)_gap_.*pkl', filename)[0]
+    print res
+    return res
 
 def main():
     import optparse
@@ -53,7 +59,7 @@ def main():
         gap = get_gap(scan)
         r = np.array(pickle.load(open(scan)))
         energies = r[:, 0]
-        flux = r[:, 1]
+        flux = r[:, 2]
         plt.plot(energies, flux, label='gap=%s' % gap)
         if abs(energies[0] - 4000) > 2:
             flux = flux[::-1]

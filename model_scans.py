@@ -108,7 +108,7 @@ def undulator_peak_intensity(gap, n, k0=2.72898056, k1=-3.83864548, k2=0.6096956
 def get_flux_vs_energy(filename):
     r = np.array(pickle.load(open(filename)))
     energy = r[:, 0]
-    flux = r[:, 1]
+    flux = r[:, 2]
     xbpm1 = r[:, -2]
     return energy, flux, xbpm1
 
@@ -152,6 +152,7 @@ def get_experimental_peaks(theory, exp_energy, exp_flux, gap, data):
 
 
 def fit(data_matrix, method='powell'):
+    x0 = 2.73096921, -3.84082989,  0.60382274
     result = minimize(residual, x0, args=(data_matrix,), method=method)
     print result
     return result
