@@ -201,7 +201,7 @@ def plot(data_matrix):
         lm.fit(np.array([ens]).T, gaps)
         
         X = np.vstack([ens/1.e3, gaps]).T
-        np.savetxt('GAP_ENERGY_HARMONIC%s.txt' % n, X, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X.shape, comments='')
+        np.savetxt('GAP_ENERGY_HARMONIC%s.txt' % n, X, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X.shape[::-1], comments='')
         ens_fit = np.linspace(ens[0], ens[-1], 50)
         gap_fit = lm.predict(np.array([ens_fit]).T)
         print '%s score' % n, lm.score(np.array([ens]).T, gaps)
@@ -211,7 +211,7 @@ def plot(data_matrix):
         coeffs.append(lm.coef_* 1e3)
         ns.append(n)
         X_fit = X = np.vstack([ens_fit/1.e3, gap_fit]).T
-        np.savetxt('fit_GAP_ENERGY_HARMONIC%s.txt' % n, X_fit, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X_fit.shape, comments='')
+        np.savetxt('fit_GAP_ENERGY_HARMONIC%s.txt' % n, X_fit, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X_fit.shape[::-1], comments='')
                                   
         #Bs = undulator_magnetic_field(gaps, n, 2.72898056, -3.83864548,  0.60969562)
         #Ks = undulator_strength(Bs)

@@ -47,7 +47,7 @@ def main():
         plt.figure(figsize=(16, 9))
         energies, flux, xbpm1 = get_flux_vs_energy(scan)
         experimental_peaks = get_experimental_peaks(
-            peak_energies, energies, flux, gap, data)
+            peak_energies, energies, xbpm1, gap, data)
         experimental_peaks_energies = []
         experimental_peaks_heights = []
         for harmonic in experimental_peaks:
