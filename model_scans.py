@@ -187,6 +187,7 @@ def plot(data_matrix):
     intercepts = []
     coeffs = []
     ns = []
+    max_gap = 7.8
     for n in harmonics:
         # gap = []
         # energy = []
@@ -194,6 +195,8 @@ def plot(data_matrix):
         selection.sort(key=lambda x: x[2])
         selection = np.array(selection)
         gaps = selection[:, 0]
+        if gaps.max() > max_gap:
+            max_gap = gaps.max()
         energies = selection[:, 2]
         modeled_energies = undulator_peak_energy(gaps, n, k0=k0, k1=k1, k2=k2)
         ens = energies
@@ -227,7 +230,7 @@ def plot(data_matrix):
     pylab.title('Proxima 2A U24 undulator harmonic peak positions as function of gap and energy', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
     pylab.ylabel('gap [mm]', fontsize=18)
-    pylab.ylim([7., 16.5])
+    pylab.ylim([7., max_gap + 0.5])
     pylab.grid(True)
     pylab.legend(loc='best', fontsize=16)
     ax = pylab.gca()
