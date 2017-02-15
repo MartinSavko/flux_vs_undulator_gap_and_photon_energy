@@ -227,7 +227,7 @@ def plot(data_matrix):
     pylab.title('Proxima 2A U24 undulator harmonic peak positions as function of gap and energy', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
     pylab.ylabel('gap [mm]', fontsize=18)
-    pylab.ylim([7., 12.5])
+    pylab.ylim([7., 16.5])
     pylab.grid(True)
     pylab.legend(loc='best', fontsize=16)
     ax = pylab.gca()
