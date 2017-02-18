@@ -109,7 +109,7 @@ def get_flux_vs_energy(filename):
     r = np.array(pickle.load(open(filename)))
     energy = r[:, 0]
     flux = r[:, 2]
-    xbpm1 = r[:, -2]
+    xbpm1 = r[:, 4]
     return energy, flux, xbpm1
 
 
@@ -129,7 +129,7 @@ def get_experimental_peaks(theory, exp_energy, exp_flux, gap, data):
     total_max = exp_flux.max()
     for harmonic, n in theory[::3]:
 
-        if harmonic > 5350. and harmonic < 19001:  # .max():
+        if harmonic > 4000. and harmonic < 20001:  # .max():
             # print 'harmonic'
             # print harmonic
             maximum_flux = exp_flux[(exp_energy > harmonic - lim) & (exp_energy < harmonic + lim)].max()
@@ -198,23 +198,26 @@ def plot(data_matrix):
         if gaps.max() > max_gap:
             max_gap = gaps.max()
         energies = selection[:, 2]
-        modeled_energies = undulator_peak_energy(gaps, n, k0=k0, k1=k1, k2=k2)
         ens = energies
-        lm = LinearRegression()
-        lm.fit(np.array([ens]).T, gaps)
-        
         X = np.vstack([ens/1.e3, gaps]).T
         np.savetxt('GAP_ENERGY_HARMONIC%s.txt' % n, X, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X.shape[::-1], comments='')
-        ens_fit = np.linspace(ens[0], ens[-1], 50)
-        gap_fit = lm.predict(np.array([ens_fit]).T)
-        print '%s score' % n, lm.score(np.array([ens]).T, gaps)
-        print '%s intercept' % n, lm.intercept_ 
-        print '%s coeff' % n, lm.coef_
-        intercepts.append(lm.intercept_)
-        coeffs.append(lm.coef_* 1e3)
-        ns.append(n)
-        X_fit = X = np.vstack([ens_fit/1.e3, gap_fit]).T
-        np.savetxt('fit_GAP_ENERGY_HARMONIC%s.txt' % n, X_fit, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X_fit.shape[::-1], comments='')
+        
+        modeled_energies = undulator_peak_energy(gaps, n, k0=k0, k1=k1, k2=k2)
+        X_model = np.vstack([modeled_energies, gaps]).T
+        np.savetxt('fit_GAP_ENERGY_HARMONIC%s.txt' % n, X_model, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X_model.shape[::-1], comments='')
+        
+        #lm = LinearRegression()
+        #lm.fit(np.array([ens, ens**2]).T, gaps)
+        #ens_fit = np.linspace(ens[0], ens[-1], 50)
+        #gap_fit = lm.predict(np.array([ens_fit, ens_fit**2]).T)
+        #print '%s score' % n, lm.score(np.array([ens, ens**2]).T, gaps)
+        #print '%s intercept' % n, lm.intercept_ 
+        #print '%s coeff' % n, lm.coef_
+        #intercepts.append(lm.intercept_)
+        #coeffs.append(lm.coef_* 1e3)
+        #ns.append(n)
+        #X_fit = X = np.vstack([ens_fit/1.e3, gap_fit]).T
+        #np.savetxt('fit_GAP_ENERGY_HARMONIC%s.txt' % n, X_fit, fmt='%6.3f', delimiter=' ', header='%d\n%d\nENERGY  GAP' % X_fit.shape[::-1], comments='')
                                   
         #Bs = undulator_magnetic_field(gaps, n, 2.72898056, -3.83864548,  0.60969562)
         #Ks = undulator_strength(Bs)
@@ -225,8 +228,8 @@ def plot(data_matrix):
         #print 'energies'
         #print energies
         pylab.plot(energies, gaps, 'o-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]], label='%d' % n)
-        pylab.plot(modeled_energies, gaps, 'kv')
-        pylab.plot(ens_fit, gap_fit,'d--', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]])
+        pylab.plot(modeled_energies, gaps, 'v-', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]])
+        #pylab.plot(ens_fit, gap_fit,'d--', color=sns.xkcd_rgb[xkcd_colors_that_i_like[n-min(harmonics)]])
     pylab.title('Proxima 2A U24 undulator harmonic peak positions as function of gap and energy', fontsize=22)
     pylab.xlabel('energy [eV]', fontsize=18)
     pylab.ylabel('gap [mm]', fontsize=18)
@@ -237,14 +240,15 @@ def plot(data_matrix):
     for label in (ax.get_xticklabels() + ax.get_yticklabels()):
         label.set_fontsize(16)
     pylab.savefig('U24_harmonic_peak_positions_gap_vs_energy.png')
-    pylab.figure(figsize=(16, 9))
-    pylab.plot(ns[:-1], coeffs[:-1], 'o-', label='coefs')
-    pylab.plot(ns[:-1], intercepts[:-1], 'd-', label='intercepts')
-    pylab.legend(loc='best', fontsize=16)
-    pylab.xlabel('harmonic number', fontsize=18)
-    pylab.ylabel('regression parameters', fontsize=18)
-    pylab.title('Linear regression parameters (gap vs. energy) as function of harmonic number', fontsize=22)
-    pylab.savefig('linear_regression_paramters_as_function_of_harmonic_number.png')
+   
+    #pylab.figure(figsize=(16, 9))
+    #pylab.plot(ns[:-1], coeffs[:-1], 'o-', label='coefs')
+    #pylab.plot(ns[:-1], intercepts[:-1], 'd-', label='intercepts')
+    #pylab.legend(loc='best', fontsize=16)
+    #pylab.xlabel('harmonic number', fontsize=18)
+    #pylab.ylabel('regression parameters', fontsize=18)
+    #pylab.title('Linear regression parameters (gap vs. energy) as function of harmonic number', fontsize=22)
+    #pylab.savefig('linear_regression_paramters_as_function_of_harmonic_number.png')
     pylab.figure(figsize=(16, 9))
     #plt.gca().set_color_cycle(sns.diverging_palette(255, 133, l=60, n=len(harmonics), center="dark"))
     #plt.gca().set_color_cycle(sns.color_palette("cubehelix", len(harmonics)))
@@ -427,7 +431,7 @@ def plot(data_matrix):
     for k, result in enumerate(data):
         gap, n, energy, flux = result
         gs.append(gap)
-        energy *= (1 + 2/(n*80))
+        #energy *= (1 + 2/(n*80))
         K = undulator_strength_from_peak_position(energy/1e3, n)
         ks.append(K)
         B = undulator_magnetic_field_from_K(K)
@@ -437,7 +441,7 @@ def plot(data_matrix):
             pylab.plot(gap, B, 'bo')
         #pylab.plot(gap, K, 'ro')
         bs.append(B)
-    x0 = [3.3, -5.47,  1.8]
+    #x0 = [3.3, -5.47,  1.8]
     #print residual((3.33, -5.47, 1.8))
     
     gs = np.array(gs)
@@ -496,7 +500,7 @@ def plot(data_matrix):
     
     ax.plot(gaps, bs3, 'gv-', label='fit')
     ax.legend(loc='best', fontsize=18)
-    pylab.xlim([7.5, 12.3])
+    #pylab.xlim([7.5, 12.3])
     pylab.savefig('B_and_K_vs_gap.png')
     #pylab.figure()
     #ax = sns.tsplot(data=d, time='gap', value='B')
