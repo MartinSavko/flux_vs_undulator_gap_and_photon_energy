@@ -27,6 +27,8 @@ def main():
     data = []
     for scan in scans:
         gap = get_gap(scan)
+        #if gap > 12:
+            #continue
         print 'gap', gap
         peak_energies = []
         peak_heights = []
