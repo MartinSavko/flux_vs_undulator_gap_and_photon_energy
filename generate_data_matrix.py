@@ -23,7 +23,6 @@ def main():
     options, args = parser.parse_args()
     
     scans = glob.glob(os.path.join(options.directory, options.template))
-    
     data = []
     for scan in scans:
         gap = get_gap(scan)
@@ -47,7 +46,7 @@ def main():
         plt.figure(figsize=(16, 9))
         energies, flux, xbpm1 = get_flux_vs_energy(scan)
         experimental_peaks = get_experimental_peaks(
-            peak_energies, energies, xbpm1, gap, data)
+            peak_energies, energies, flux, gap, data)
         experimental_peaks_energies = []
         experimental_peaks_heights = []
         for harmonic in experimental_peaks:
