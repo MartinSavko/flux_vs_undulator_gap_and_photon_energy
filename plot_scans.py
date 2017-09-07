@@ -271,7 +271,7 @@ def main():
     
     ens1 = np.hstack((ens_from_ans, [0]))
     ens2 = np.hstack(([0], ens_from_ans))
-    ans_difference_between_neighboring_points_in_eV = ens2 - ens1
+    ans_difference_between_neighboring_points_in_eV = ens1 - ens2
     
     plt.plot(ens[1:], medfilt(difference_between_neighboring_points_in_eV[1:-1], 5), 'bo')
     print 'ens_from_ans', ens_from_ans
